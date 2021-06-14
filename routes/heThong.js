@@ -252,7 +252,7 @@ router.get('/comments-admin-daduyet/:page', commentController.LayCommentTheoIDSa
 router.get('/countries', countriesController.LayDanhSachCountriesAll);
 // Phần xử lý bên MOMO
 router.post('/gw_payment/transactionProcessor', momoController.ThemDonHang_MOMO);
-router.post('/gw_payment/ConfirmUrl_MoMo', momoController.ConfirmUrl_MoMo);
+router.get('/gw_payment/ConfirmUrl_MoMo', momoController.ConfirmUrl_MoMo);
 // Phần xử lý hình ảnh
 router.post('/upload-image', imageController.UploadAnh);
 router.get('/open-image', imageController.OpenImage);

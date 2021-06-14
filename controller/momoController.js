@@ -91,6 +91,9 @@ module.exports = {
         var payType = queryObject_parse.payType;
         var extraData = queryObject_parse.extraData;
         var serectkey = process.env.SECRET_KEY_MOMO;
+        var hoTen = queryObject_parse.hoTen;
+        var sdt = queryObject_parse.sdt;
+        var diaChi = queryObject_parse.diaChi;
         var rawSignature = "partnerCode=" + partnerCode + "&accessKey=" + accessKey
          + "&requestId=" + requestId + "&amount=" + amount + "&orderId=" + orderId
           + "&orderInfo=" + orderInfo + "&orderType=" + orderType + "&transId=" + transId
