@@ -11,11 +11,12 @@ module.exports = {
         var hoTen = req.body.thongTinNguoiMua.hoTen;
         var sdt = req.body.thongTinNguoiMua.sdt;
         var diaChi = req.body.thongTinNguoiMua.diaChi;
+        var idShow = req.body.orderInfo;
         var partnerCode = "MOMOLYYH20210531";
         var accessKey = process.env.ACCESS_KEY_MOMO;
         var serectkey = process.env.SECRET_KEY_MOMO; 
         var orderInfo = `OneUp : Thanh toán hóa đơn ${req.body.orderInfo}`;
-        var returnUrl = `http://localhost:5000/api/hethong/gw_payment/ConfirmUrl_MoMo?hoTen=${hoTen}&sdt=${sdt}&diaChi=${diaChi}`;
+        var returnUrl = `http://localhost:5000/api/hethong/gw_payment/ConfirmUrl_MoMo?hoTen=${hoTen}&sdt=${sdt}&diaChi=${diaChi}&idShow=${idShow}`;
         var notifyurl = `http://localhost:5000/api/hethong/gw_payment/NotifyUrl_MoMo`;
         var amount = req.body.amount;
         var orderId = uuid.v1();
@@ -94,6 +95,7 @@ module.exports = {
         var hoTen = queryObject_parse.hoTen;
         var sdt = queryObject_parse.sdt;
         var diaChi = queryObject_parse.diaChi;
+        var idShow = queryObject_parse.idShow;
         var rawSignature = "partnerCode=" + partnerCode + "&accessKey=" + accessKey
          + "&requestId=" + requestId + "&amount=" + amount + "&orderId=" + orderId
           + "&orderInfo=" + orderInfo + "&orderType=" + orderType + "&transId=" + transId
@@ -104,7 +106,7 @@ module.exports = {
         var signature = crypto.createHmac('sha256', serectkey).update(rawSignature).digest('hex');
         if(queryObject_parse.signature === signature && errorCode === '0') {
             console.log('success');
-            res.redirect(`http://localhost:3007/checkout/payment/confirm/momo?hoTen=${hoTen}&sdt=${sdt}&diaChi=${diaChi}`);
+            res.redirect(`http://localhost:3007/checkout/payment/confirm/momo?hoTen=${hoTen}&sdt=${sdt}&diaChi=${diaChi}&idShow=${idShow}`);
         }
         else {  
             console.log('fail');
