@@ -8,23 +8,22 @@ module.exports = {
 
     ThemDonHang_MOMO: function (req, res) {
 
-
+        var hoTen = req.body.thongTinNguoiMua.hoTen;
+        var sdt = req.body.thongTinNguoiMua.sdt;
+        var diaChi = req.body.thongTinNguoiMua.diaChi;
         var partnerCode = "MOMOLYYH20210531";
         var accessKey = process.env.ACCESS_KEY_MOMO;
         var serectkey = process.env.SECRET_KEY_MOMO; 
         var orderInfo = `OneUp : Thanh toán hóa đơn ${req.body.orderInfo}`;
-        var returnUrl = `http://localhost:3007/checkout/payment/success/${req.body.orderInfo}`;
-        var notifyurl = `http://localhost:3007/checkout/payment/success/${req.body.orderInfo}`;
+        var returnUrl = `http://localhost:5000/api/hethong/gw_payment/ConfirmUrl_MoMo?hoTen=${hoTen}&sdt=${sdt}&diaChi=${diaChi}`;
+        var notifyurl = `http://localhost:5000/api/hethong/gw_payment/NotifyUrl_MoMo`;
         var amount = req.body.amount;
         var orderId = uuid.v1();
         var requestId = uuid.v1();
         var requestType = "captureMoMoWallet";
         var extraData = "merchantName=;merchantId=";
-
         var rawSignature = "partnerCode=" + partnerCode + "&accessKey=" + accessKey + "&requestId=" + requestId + "&amount=" + amount + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&returnUrl=" + returnUrl + "&notifyUrl=" + notifyurl + "&extraData=" + extraData;
-
         var signature = crypto.createHmac('sha256', serectkey).update(rawSignature).digest('hex');
-
         var body = JSON.stringify({
             partnerCode: partnerCode,
             accessKey: accessKey,
@@ -50,23 +49,21 @@ module.exports = {
             }
         };
 
-
+        
         var ketqua;
         var request = https.request(options, (ress) => {
             ress.setEncoding('utf8');
             ress.on('data', (body) => {
                 ketqua += body;
             }); 
-
             ress.on('end', () => {  
                 res.status(200).json({
                     status: 'success',
                     data: ketqua.toString().substring(216, 520),
-            
+                    
                 });
             });
         })
-
         
         request.on('error', (e) => {
             console.log(`problem with request: ${e.message}`);
@@ -76,26 +73,45 @@ module.exports = {
     },
     
     ConfirmUrl_MoMo: function (req, res) {
-        
-        function getSearchParameters() {
-            var prmstr = window.location.search.substr(1);
-            return prmstr != null && prmstr != "" ? transformToAssocArray(prmstr) : {};
+        var queryObject = url.parse(req.url,true).query;
+        var queryObject_json = JSON.stringify(queryObject);
+        var queryObject_parse = JSON.parse(queryObject_json);
+        var partnerCode = queryObject_parse.partnerCode;
+        var accessKey = queryObject_parse.accessKey;
+        var requestId = queryObject_parse.requestId;
+        var amount = queryObject_parse.amount;
+        var orderId = queryObject_parse.orderId;
+        var orderInfo = queryObject_parse.orderInfo;
+        var orderType = queryObject_parse.orderType;
+        var transId = queryObject_parse.transId;
+        var message = queryObject_parse.message;
+        var localMessage = queryObject_parse.localMessage;
+        var responseTime = queryObject_parse.responseTime;
+        var errorCode = queryObject_parse.errorCode;
+        var payType = queryObject_parse.payType;
+        var extraData = queryObject_parse.extraData;
+        var serectkey = process.env.SECRET_KEY_MOMO;
+        var rawSignature = "partnerCode=" + partnerCode + "&accessKey=" + accessKey
+         + "&requestId=" + requestId + "&amount=" + amount + "&orderId=" + orderId
+          + "&orderInfo=" + orderInfo + "&orderType=" + orderType + "&transId=" + transId
+          + "&message=" + message + "&localMessage=" + localMessage
+          + "&responseTime=" + responseTime + "&errorCode=" + errorCode
+          + "&payType=" + payType  + "&extraData=" + extraData
+          ; 
+        var signature = crypto.createHmac('sha256', serectkey).update(rawSignature).digest('hex');
+        if(queryObject_parse.signature === signature && errorCode === '0') {
+            console.log('success');
+            res.redirect(`http://localhost:3007/checkout/payment/confirm/momo?hoTen=${hoTen}&sdt=${sdt}&diaChi=${diaChi}`);
         }
-        
-        function transformToAssocArray( prmstr ) {
-            var params = {};
-            var prmarr = prmstr.split("&");
-            for ( var i = 0; i < prmarr.length; i++) {
-                var tmparr = prmarr[i].split("=");
-                params[tmparr[0]] = tmparr[1];
-            }
-            return params;
+        else {  
+            console.log('fail');
+            res.redirect(`${process.env.CLIENT_URL_LOCAL}`);
         }
-        
-        var params = getSearchParameters();
+    },
 
-
-    
+    ConfirmNotify_Url: function (req, res) { 
+        console.log(req.body)
     }
 
 }
+
